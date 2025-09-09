@@ -1,0 +1,48 @@
+INSTALLATION FOR WINDOWS
+
+Step 1: Clone the repository
+git clone https://github.com/JayGeeUnreal/StyleTTS2.git
+
+Step 2: Navigate inside the cloned repository
+cd StyleTTS2
+
+Step 3: Create virtual environment
+conda create -yn styletts2 python=3.11
+
+Step 4: Activate virtual environment
+conda activate styletts2
+
+Step 5: Install requirements
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118 -U
+pip install -r requirements.txt
+pip install phonemizer
+pip install gradio
+pip install cached_path
+pip install txtsplit
+pip install flask
+pip install flask-cors
+pip install pygame
+
+Step 6: Download and install eSpeak NG
+https://github.com/espeak-ng/espeak-ng/releases
+
+Step 7: Set environment variables
+PHONEMIZER_ESPEAK_PATH = C:\Program Files\eSpeak NG
+PHONEMIZER_ESPEAK_LIBRARY = C:\Program Files\eSpeak NG\libespeak-ng.dll
+
+!! You use this variable on YOUR OWN RISC !!
+TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1
+
+Now you can either run the Gradio UI with - python app.py
+
+Or you nan run - Python post_app.py for the post server. This can be used together with Social Stream Ninjas POST function
+args you can use for the post_app
+
+--reference_voice (For cloning)
+default=voices/f-us-1.wav
+
+--host
+ default=127.0.0.1
+
+--port
+default=13000
