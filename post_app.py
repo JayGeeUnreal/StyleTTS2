@@ -8,7 +8,8 @@ from flask_cors import CORS
 import soundfile as sf
 import numpy as np
 import torch
-import pygame # MODIFICATION: Import the pygame library
+import pygame
+import phonemizer
 
 # --- Core StyleTTS2 Imports ---
 import styletts2importable
@@ -18,13 +19,21 @@ from txtsplit import txtsplit
 app = Flask(__name__)
 CORS(app)
 
+print("Initializing phonemizer with stress...")
+global_phonemizer = phonemizer.backend.EspeakBackend(
+    language='en-us',
+    preserve_punctuation=True,
+    with_stress=True
+)
+print("Phonemizer initialized.")
+
 # --- Global variable to hold our pre-computed voice style ---
 global_target_style = None
 
-# --- Configuration (can be overridden by command-line args) ---
+# --- Configuration ---
 DIFFUSION_STEPS = 20
-EMBEDDING_SCALE = 1.0
-ALPHA = 0.3
+EMBEDDING_SCALE = 1
+ALPHA = 0.4
 BETA = 0.7
 SAMPLE_RATE = 24000
 
@@ -47,8 +56,18 @@ def initialize_styletts2(reference_voice_path):
 @app.route('/tts', methods=['POST'])
 def tts_endpoint():
     print("\n--- New TTS Request Received ---")
+    
+    try:
+        if pygame.mixer.get_init():
+            print("Releasing previous audio file lock...")
+            pygame.mixer.music.stop()
+            pygame.mixer.music.unload()
+            print("File lock released.")
+    except Exception as e:
+        print(f"Warning: Could not unload previous audio. This might be the first run. Error: {e}")
+
     data = request.get_json()
-    # print(f"Parsed JSON data: {data}")
+    print(f"Parsed JSON data: {data}")
 
     if global_target_style is None:
         return jsonify({"error": "TTS model is not initialized"}), 503
@@ -79,18 +98,13 @@ def tts_endpoint():
         print(f"Saving a copy of the audio to: {output_filepath}")
         sf.write(output_filepath, full_audio, SAMPLE_RATE)
 
-        # --- START MODIFICATION: Play the generated audio ---
         try:
-            print("Playing synthesized audio on the server...")
-            # Stop any currently playing audio to prevent overlap
-            pygame.mixer.music.stop()
-            # Load the new file
-            pygame.mixer.music.load(output_filepath)
-            # Play it
-            pygame.mixer.music.play()
+            if pygame.mixer.get_init():
+                print("Playing new audio track...")
+                pygame.mixer.music.load(output_filepath)
+                pygame.mixer.music.play()
         except Exception as e:
             print(f"Warning: Could not play audio. Pygame error: {e}")
-        # --- END MODIFICATION ---
 
         # Prepare the audio to send back as a response
         buffer = io.BytesIO()
@@ -110,6 +124,7 @@ def parse_args():
     parser.add_argument("--reference_voice", type=str, default="voices/f-us-1.wav", help="Path to the reference voice audio file (.wav) for cloning.")
     parser.add_argument("--host", type=str, default="127.0.0.1", help="Host address for the Flask server.")
     parser.add_argument("--port", type=int, default=13000, help="Port for the Flask server.")
+    # MODIFICATION: Corrected the typo from add__argument to add_argument
     parser.add_argument("--debug", action="store_true", help="Enable Flask debug mode.")
     return parser.parse_args()
 
@@ -117,13 +132,11 @@ def parse_args():
 if __name__ == "__main__":
     args = parse_args()
 
-    # --- START MODIFICATION: Initialize Pygame Mixer ---
     try:
         pygame.mixer.init()
         print("Pygame mixer initialized successfully.")
     except Exception as e:
         print(f"Warning: Could not initialize Pygame mixer: {e}. Audio playback will be disabled.")
-    # --- END MODIFICATION ---
 
     initialize_styletts2(reference_voice_path=args.reference_voice)
     
