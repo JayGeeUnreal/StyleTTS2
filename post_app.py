@@ -48,7 +48,7 @@ def initialize_styletts2(reference_voice_path):
 def tts_endpoint():
     print("\n--- New TTS Request Received ---")
     data = request.get_json()
-    print(f"Parsed JSON data: {data}")
+    # print(f"Parsed JSON data: {data}")
 
     if global_target_style is None:
         return jsonify({"error": "TTS model is not initialized"}), 503
@@ -107,7 +107,7 @@ def tts_endpoint():
 # --- Argument Parsing for the Flask Server ---
 def parse_args():
     parser = argparse.ArgumentParser(description="StyleTTS 2 Flask Server")
-    parser.add_argument("--reference_voice", type=str, default="voices/earn_lucky_pitch_minus_one_samplerate_24000_short.wav", help="Path to the reference voice audio file (.wav) for cloning.")
+    parser.add_argument("--reference_voice", type=str, default="voices/f-us-1.wav", help="Path to the reference voice audio file (.wav) for cloning.")
     parser.add_argument("--host", type=str, default="127.0.0.1", help="Host address for the Flask server.")
     parser.add_argument("--port", type=int, default=13000, help="Port for the Flask server.")
     parser.add_argument("--debug", action="store_true", help="Enable Flask debug mode.")
