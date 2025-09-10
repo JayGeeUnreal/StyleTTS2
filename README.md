@@ -44,6 +44,7 @@ PHONEMIZER_ESPEAK_PATH = C:\Program Files\eSpeak NG
 PHONEMIZER_ESPEAK_LIBRARY = C:\Program Files\eSpeak NG\libespeak-ng.dll
 
 !! You use this variable on YOUR OWN RISC !!
+
 TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1 (This is a workaround to make it work....)
 
 Now you can either run the Gradio UI with - python app.py
