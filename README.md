@@ -2,6 +2,48 @@
 
 ### Yinghao Aaron Li, Cong Han, Vinay S. Raghavan, Gavin Mischler, Nima Mesgarani
 
+INSTALLATION FOR WINDOWS
+
+Step 1: Clone the repository
+git clone https://github.com/JayGeeUnreal/StyleTTS2.git
+
+Step 2: Navigate inside the cloned repository
+cd StyleTTS2
+
+Step 3: Create virtual environment
+conda create -yn styletts2 python=3.11
+
+Step 4: Activate virtual environment
+conda activate styletts2
+
+Step 5: Install requirements
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118 -U
+pip install -r requirements.txt
+pip install phonemizer
+pip install gradio
+pip install cached_path
+pip install txtsplit
+pip install flask
+pip install flask-cors
+pip install pygame
+
+Step 6: Download and install eSpeak NG
+https://github.com/espeak-ng/espeak-ng/releases
+
+Step 7: Set environment variables
+PHONEMIZER_ESPEAK_PATH = C:\Program Files\eSpeak NG
+PHONEMIZER_ESPEAK_LIBRARY = C:\Program Files\eSpeak NG\libespeak-ng.dll
+
+!! You use this variable on YOUR OWN RISC !!
+TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1 (This is a workaround to make it work....)
+
+Now you can either run the Gradio UI with - python app.py
+
+Or you can run - Python post_app.py for the post server. This can be used together with Social Stream Ninjas POST function
+Before running post_app.py edit the settings.ini.
+You can add your own reference voice voices to voices/
+
+
 > In this paper, we present StyleTTS 2, a text-to-speech (TTS) model that leverages style diffusion and adversarial training with large speech language models (SLMs) to achieve human-level TTS synthesis. StyleTTS 2 differs from its predecessor by modeling styles as a latent random variable through diffusion models to generate the most suitable style for the text without requiring reference speech, achieving efficient latent diffusion while benefiting from the diverse speech synthesis offered by diffusion models. Furthermore, we employ large pre-trained SLMs, such as WavLM, as discriminators with our novel differentiable duration modeling for end-to-end training, resulting in improved speech naturalness. StyleTTS 2 surpasses human recordings on the single-speaker LJSpeech dataset and matches it on the multispeaker VCTK dataset as judged by native English speakers. Moreover, when trained on the LibriTTS dataset, our model outperforms previous publicly available models for zero-shot speaker adaptation. This work achieves the first human-level TTS synthesis on both single and multispeaker datasets, showcasing the potential of style diffusion and adversarial training with large SLMs.
 
 Paper: [https://arxiv.org/abs/2306.07691](https://arxiv.org/abs/2306.07691)
