@@ -2,7 +2,8 @@ import os
 import sys
 import argparse
 import io
-import random # MODIFICATION: Added the missing import for the 'random' library
+import random
+import configparser # MODIFICATION: Import the configuration library
 
 from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
@@ -15,6 +16,26 @@ import phonemizer
 # --- Core StyleTTS2 Imports ---
 import styletts2importable
 from txtsplit import txtsplit
+
+# --- START MODIFICATION: Load Configuration from settings.ini ---
+config = configparser.ConfigParser()
+config.read('settings.ini')
+
+# Load TTS parameters from the file
+DIFFUSION_STEPS = config.getint('TTS', 'diffusion_steps')
+EMBEDDING_SCALE = config.getfloat('TTS', 'embedding_scale')
+ALPHA = config.getfloat('TTS', 'alpha')
+BETA = config.getfloat('TTS', 'beta')
+SAMPLE_RATE = config.getint('TTS', 'sample_rate')
+SEED = config.getint('TTS', 'seed')
+REFERENCE_VOICE = config.get('TTS', 'reference_voice')
+
+# Load Server parameters from the file
+SERVER_HOST = config.get('Server', 'host')
+SERVER_PORT = config.getint('Server', 'port')
+SERVER_DEBUG = config.getboolean('Server', 'debug')
+# --- END MODIFICATION ---
+
 
 # --- Helper Function for Reproducibility ---
 def set_seed(seed):
@@ -43,13 +64,6 @@ print("Phonemizer initialized.")
 # --- Global variable to hold our pre-computed voice style ---
 global_target_style = None
 
-# --- Configuration ---
-DIFFUSION_STEPS = 20
-EMBEDDING_SCALE = 1.0
-ALPHA = 0.3
-BETA = 0.7
-SAMPLE_RATE = 24000
-
 # --- Initialization Function for StyleTTS2 ---
 def initialize_styletts2(reference_voice_path):
     global global_target_style
@@ -68,7 +82,7 @@ def initialize_styletts2(reference_voice_path):
 # --- The TTS API Endpoint ---
 @app.route('/tts', methods=['POST'])
 def tts_endpoint():
-    set_seed(42) # Set a fixed seed for every request to get consistent nuances
+    set_seed(SEED) # Use the seed value loaded from the settings file
     print("\n--- New TTS Request Received ---")
     
     try:
@@ -117,7 +131,6 @@ def tts_endpoint():
         except Exception as e:
             print(f"Warning: Could not play audio. Pygame error: {e}")
 
-        # Prepare the audio to send back as a response
         buffer = io.BytesIO()
         sf.write(buffer, full_audio, SAMPLE_RATE, format='WAV')
         buffer.seek(0)
@@ -129,28 +142,19 @@ def tts_endpoint():
         traceback.print_exc()
         return jsonify({"error": "Internal server error during audio generation"}), 500
 
-# --- Argument Parsing for the Flask Server ---
-def parse_args():
-    parser = argparse.ArgumentParser(description="StyleTTS 2 Flask Server")
-    parser.add_argument("--reference_voice", type=str, default="voices/f-us-1.wav", help="Path to the reference voice audio file (.wav) for cloning.")
-    parser.add_argument("--host", type=str, default="127.0.0.1", help="Host address for the Flask server.")
-    parser.add_argument("--port", type=int, default=13000, help="Port for the Flask server.")
-    parser.add_argument("--debug", action="store_true", help="Enable Flask debug mode.")
-    return parser.parse_args()
-
 # --- Main Function to Start the Server ---
 if __name__ == "__main__":
-    args = parse_args()
-
     try:
         pygame.mixer.init()
         print("Pygame mixer initialized successfully.")
     except Exception as e:
         print(f"Warning: Could not initialize Pygame mixer: {e}. Audio playback will be disabled.")
 
-    initialize_styletts2(reference_voice_path=args.reference_voice)
+    # The reference voice path now comes from the settings file
+    initialize_styletts2(reference_voice_path=REFERENCE_VOICE)
     
-    print(f"\nStarting Flask server on http://{args.host}:{args.port}")
+    print(f"\nStarting Flask server on http://{SERVER_HOST}:{SERVER_PORT}")
     print("Send a POST request to /tts with JSON {'chatmessage': 'your text here'}")
     
-    app.run(host=args.host, port=args.port, debug=args.debug)
+    # The host, port, and debug mode all come from the settings file
+    app.run(host=SERVER_HOST, port=SERVER_PORT, debug=SERVER_DEBUG)
