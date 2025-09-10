@@ -2,6 +2,7 @@ import os
 import sys
 import argparse
 import io
+import random # MODIFICATION: Added the missing import for the 'random' library
 
 from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
@@ -14,6 +15,18 @@ import phonemizer
 # --- Core StyleTTS2 Imports ---
 import styletts2importable
 from txtsplit import txtsplit
+
+# --- Helper Function for Reproducibility ---
+def set_seed(seed):
+    """Sets the random seed for reproducibility."""
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)
+    np.random.seed(seed)
+    random.seed(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
 
 # --- Flask App Initialization ---
 app = Flask(__name__)
@@ -32,8 +45,8 @@ global_target_style = None
 
 # --- Configuration ---
 DIFFUSION_STEPS = 20
-EMBEDDING_SCALE = 1
-ALPHA = 0.4
+EMBEDDING_SCALE = 1.0
+ALPHA = 0.3
 BETA = 0.7
 SAMPLE_RATE = 24000
 
@@ -55,14 +68,13 @@ def initialize_styletts2(reference_voice_path):
 # --- The TTS API Endpoint ---
 @app.route('/tts', methods=['POST'])
 def tts_endpoint():
+    set_seed(42) # Set a fixed seed for every request to get consistent nuances
     print("\n--- New TTS Request Received ---")
     
     try:
         if pygame.mixer.get_init():
-            print("Releasing previous audio file lock...")
             pygame.mixer.music.stop()
             pygame.mixer.music.unload()
-            print("File lock released.")
     except Exception as e:
         print(f"Warning: Could not unload previous audio. This might be the first run. Error: {e}")
 
@@ -100,7 +112,6 @@ def tts_endpoint():
 
         try:
             if pygame.mixer.get_init():
-                print("Playing new audio track...")
                 pygame.mixer.music.load(output_filepath)
                 pygame.mixer.music.play()
         except Exception as e:
@@ -124,7 +135,6 @@ def parse_args():
     parser.add_argument("--reference_voice", type=str, default="voices/f-us-1.wav", help="Path to the reference voice audio file (.wav) for cloning.")
     parser.add_argument("--host", type=str, default="127.0.0.1", help="Host address for the Flask server.")
     parser.add_argument("--port", type=int, default=13000, help="Port for the Flask server.")
-    # MODIFICATION: Corrected the typo from add__argument to add_argument
     parser.add_argument("--debug", action="store_true", help="Enable Flask debug mode.")
     return parser.parse_args()
 

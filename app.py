@@ -28,6 +28,19 @@ theme = gr.themes.Base(
 voicelist = ['f-us-1', 'f-us-2', 'f-us-3', 'f-us-4', 'm-us-1', 'm-us-2', 'm-us-3', 'm-us-4']
 voices = {}
 import phonemizer
+import random
+
+def set_seed(seed):
+    """Sets the random seed for reproducibility."""
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)  # if you are using multi-GPU
+    np.random.seed(seed)
+    random.seed(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+
 global_phonemizer = phonemizer.backend.EspeakBackend(language='en-us', preserve_punctuation=True,  with_stress=True)
 # todo: cache computed style, load using pickle
 # if os.path.exists('voices.pkl'):
@@ -78,6 +91,7 @@ def synthesize(text, voice, lngsteps, password, progress=gr.Progress()):
 #     else:
 #         raise gr.Error('Wrong access code')
 def rn_clsynthesize(text, voice, vcsteps, embscale, alpha, beta, progress=gr.Progress()):
+    set_seed(42)
     # if text.strip() == "":
     #     raise gr.Error("You must enter some text")
     # # if global_phonemizer.phonemize([text]) > 300:
