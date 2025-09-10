@@ -31,18 +31,13 @@ PHONEMIZER_ESPEAK_PATH = C:\Program Files\eSpeak NG
 PHONEMIZER_ESPEAK_LIBRARY = C:\Program Files\eSpeak NG\libespeak-ng.dll
 
 !! You use this variable on YOUR OWN RISC !!
-TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1
+TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1 (This is a workaround to make it work....)
 
 Now you can either run the Gradio UI with - python app.py
 
-Or you nan run - Python post_app.py for the post server. This can be used together with Social Stream Ninjas POST function
-args you can use for the post_app
+Or you can run - Python post_app.py for the post server. This can be used together with Social Stream Ninjas POST function
+Before running post_app.py edit the settings.ini.
+You can add your own reference voices to voices/
 
---reference_voice (For cloning)
-default=voices/f-us-1.wav
-
---host
- default=127.0.0.1
-
---port
-default=13000
+Before Updating the files save your settings.ini
+To update to the latest files go into your StyleTTS2 and run git pull origin.
