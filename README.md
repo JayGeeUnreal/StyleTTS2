@@ -17,6 +17,7 @@ Step 4: Activate virtual environment
 conda activate styletts2
 
 Step 5: Install requirements
+
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118 -U
 pip install -r requirements.txt
 pip install phonemizer
