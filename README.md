@@ -19,14 +19,22 @@ conda activate styletts2
 Step 5: Install requirements
 
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118 -U\n
-pip install -r requirements.txt\n
-pip install phonemizer\n
-pip install gradio\n
-pip install cached_path\n
-pip install txtsplit\n
-pip install flask\n
-pip install flask-cors\n
-pip install pygame\n
+pip install -r requirements.txt
+
+pip install phonemizer
+
+pip install gradio
+
+pip install cached_path
+
+pip install txtsplit
+
+pip install flask
+
+pip install flask-cors
+
+pip install pygame
+
 
 Step 6: Download and install eSpeak NG
 https://github.com/espeak-ng/espeak-ng/releases
