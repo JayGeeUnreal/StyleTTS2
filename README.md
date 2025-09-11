@@ -2,6 +2,24 @@
 
 ### Yinghao Aaron Li, Cong Han, Vinay S. Raghavan, Gavin Mischler, Nima Mesgarani
 
+Steps
+
+Social Stream Ninja – Sends to post_app.py
+
+\listen
+
+	listen.py – Sends to post_app.py
+		
+\StyleTTS2
+
+	post_app.py - Sends to watcher_to_face.py
+
+\NeuroSync_Player-main
+
+	watcher_to_face.py - Sends to Unreal Engine
+
+Unreal Engine
+
 INSTALLATION FOR WINDOWS
 
 Step 1: Clone the repository
